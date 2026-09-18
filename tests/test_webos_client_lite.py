@@ -368,6 +368,39 @@ class TestWebOsClientLite():
         with pytest.raises(Exception):
             await client.luna_request("test.uri", {"a": 1})
 
+    async def test_luna_request_falls_back_to_key_press_when_close_alert_hangs(self, mocker):
+        """webOS 26 never answers closeAlert, so the alert must be confirmed with a key press."""
+        client = await WebOsClient.create("x", states=[], client_key="x", timeout_luna_close=0)
+
+        calls = {"n": 0}
+
+        async def create_alert_then_hang(*args, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                return {"alertId": "alert_1"}
+            await asyncio.sleep(3600)
+
+        mocker.patch.object(client, "request", side_effect=create_alert_then_hang)
+        button_mock = mocker.patch.object(client, "button")
+
+        result = await client.luna_request("test.uri", {"a": 1})
+
+        assert result is None
+        button_mock.assert_called_once_with("ENTER")
+
+    async def test_luna_request_returns_close_alert_reply_on_older_firmware(self, mocker):
+        """Firmware that still answers closeAlert must not trigger the key-press fallback."""
+        client = await WebOsClient.create("x", states=[], client_key="x")
+        mocker.patch.object(
+            client, "request", side_effect=[{"alertId": "alert_1"}, {"returnValue": True}]
+        )
+        button_mock = mocker.patch.object(client, "button")
+
+        result = await client.luna_request("test.uri", {"a": 1})
+
+        assert result == {"returnValue": True}
+        button_mock.assert_not_called()
+
     async def test_enable_tpc_or_gsr_validation(self):
         client = await WebOsClient.create("x", states=[], client_key="x")
 

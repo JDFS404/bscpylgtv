@@ -62,6 +62,7 @@ class WebOsClient:
         manifest_file_path=None,
         pairing_type=None,
         timeout_connect=2,
+        timeout_luna_close=2,
         connect_retry_attempts=9,
         connect_retry_interval_ms=200,
         ping_interval=1,
@@ -85,6 +86,7 @@ class WebOsClient:
         self.client_key = client_key
         self.command_count = 0
         self.timeout_connect = max(0, int(timeout_connect))
+        self.timeout_luna_close = max(0, int(timeout_luna_close))
         self.connect_retry_attempts = max(1, int(connect_retry_attempts))
         self.connect_retry_interval_ms = max(0, int(connect_retry_interval_ms))
         self.ping_interval = ping_interval
@@ -1315,7 +1317,21 @@ class WebOsClient:
         if alertId is None:
             raise PyLGTVCmdException("Invalid alertId")
 
-        return await self.request(ep.CLOSE_ALERT, payload={"alertId": alertId})
+        # webOS 26 (seen on firmware 43.21.71) no longer answers closeAlert for alerts that
+        # originate from the API adapter. The request never returns, the alert stays on
+        # screen, and neither onclose nor onClick fires -- so the luna command is silently
+        # dropped and every caller hangs forever on the await.
+        # Confirming the alert with a virtual ENTER key press over the same websocket
+        # activates its button and runs the command. Older firmware answers closeAlert as
+        # before, so this fallback only engages when it is actually needed.
+        try:
+            return await asyncio.wait_for(
+                self.request(ep.CLOSE_ALERT, payload={"alertId": alertId}),
+                self.timeout_luna_close,
+            )
+        except asyncio.TimeoutError:
+            await self.button("ENTER")
+            return None
 
     async def set_device_info_luna(self, input, icon, label):
         """Set device info. It can be used to switch between PC and non-PC modes.

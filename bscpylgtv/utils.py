@@ -35,6 +35,7 @@ async def runloop(args):
         timeout_connect=args.timeout_connect,
         connect_retry_attempts=args.connect_retry_attempts,
         connect_retry_interval_ms=args.connect_retry_interval_ms,
+        timeout_luna_close=args.timeout_luna_close,
         ping_interval=None,
         volume_step_delay_ms=args.volume_step_delay_ms,
         get_hello_info=args.get_hello_info,
@@ -151,6 +152,13 @@ def bscpylgtvcommand():
             type=int,
             default=2,
             help="optional setting the connection timout in seconds"
+        )
+        parser.add_argument(
+            "--timeout_luna_close",
+            dest="timeout_luna_close",
+            type=int,
+            default=2,
+            help="optional setting how long to wait for a closeAlert reply before confirming the alert with a key press (webOS 26)"
         )
         parser.add_argument(
             "--connect_retry_attempts",
