@@ -381,7 +381,7 @@ class TestWebOsClientLite():
             await asyncio.sleep(3600)
 
         mocker.patch.object(client, "request", side_effect=create_alert_then_hang)
-        button_mock = mocker.patch.object(client, "button")
+        button_mock = mocker.patch.object(client, "button", return_value=None)
 
         result = await client.luna_request("test.uri", {"a": 1})
 

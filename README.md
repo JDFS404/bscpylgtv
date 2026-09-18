@@ -141,9 +141,7 @@ bscpylgtvcommand -l -p "D:\config\.aiopylgtv.sqlite"
 bscpylgtvcommand --timeout_connect 2 192.168.1.18 button INFO
 # --connect_retry_attempts <attempts> : set the number of times the client tries to connect to host (default: 9)
 bscpylgtvcommand --connect_retry_attempts 9 192.168.1.18 button INFO
-# --timeout_luna_close <seconds> : how long to wait for a closeAlert reply before confirming the
-#   alert with a virtual ENTER key press (default: 2). On webOS 26 closeAlert never replies, so
-#   without this fallback every luna setter blocks until someone presses OK on the TV.
+# --timeout_luna_close <seconds> : set how long to wait for a closeAlert reply before confirming the alert with a key press (default: 2)
 bscpylgtvcommand --timeout_luna_close 2 192.168.1.18 set_settings picture '{"backlight": "80"}'
 # --connect_retry_interval_ms <milliseconds> : set the time in ms between connection retries (default: 200)
 bscpylgtvcommand --connect_retry_interval_ms 200 192.168.1.18 button INFO
