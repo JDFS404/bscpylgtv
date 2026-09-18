@@ -369,7 +369,7 @@ class TestWebOsClientLite():
             await client.luna_request("test.uri", {"a": 1})
 
     async def test_luna_request_falls_back_to_key_press_when_close_alert_hangs(self, mocker):
-        """webOS 26 never answers closeAlert, so the alert must be confirmed with a key press."""
+        """A TV that never answers closeAlert must still apply the command, via a key press."""
         client = await WebOsClient.create("x", states=[], client_key="x", timeout_luna_close=0)
 
         calls = {"n": 0}

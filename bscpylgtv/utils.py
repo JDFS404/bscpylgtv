@@ -158,7 +158,7 @@ def bscpylgtvcommand():
             dest="timeout_luna_close",
             type=int,
             default=2,
-            help="optional setting how long to wait for a closeAlert reply before confirming the alert with a key press (webOS 26)"
+            help="optional setting how long to wait for a closeAlert reply before confirming the alert with a key press"
         )
         parser.add_argument(
             "--connect_retry_attempts",

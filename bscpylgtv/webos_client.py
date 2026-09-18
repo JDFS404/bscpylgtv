@@ -1317,7 +1317,7 @@ class WebOsClient:
         if alertId is None:
             raise PyLGTVCmdException("Invalid alertId")
 
-        # webOS 26 doesn't answer closeAlert, confirm the alert with a key press instead
+        # some TVs stop answering closeAlert, confirm the alert with a key press instead
         try:
             return await asyncio.wait_for(
                 self.request(ep.CLOSE_ALERT, payload={"alertId": alertId}),
